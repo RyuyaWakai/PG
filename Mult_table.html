@@ -1,0 +1,265 @@
+<html>
+
+<head>
+    <script type="text/javascript">
+
+        var tmp; //インターバル用変数
+        var n; //かけられる数
+        var m; //かける数
+        var flag; //ボタンが押されたかどうかのフラグ。1ならば押しても反応がない。
+        var ans; //問題の答えを保存
+        var rate; //正解率
+        var time = 1000; //制限時間。初期値は1000
+        var ans_count = 0; //正解した数を記録
+        var ram_count = 0; //ランダムの時に、現在の問題が何問目かを記録
+        var ram_f = 0; //現在の問題がランダム問題かどうかを判定する。1ならばランダム問題。
+
+        //制限時間を設定する関数
+        function set_time(i) {
+            var time_c;
+            time = i;
+            time_c = time / 1000; //ミリ秒を秒に戻す
+            document.getElementById("limit").innerHTML = "制限時間 : " + time_c + " 秒 "; //ボタンが押されるたびにページ上の表記を変更する
+        }
+
+        //1の段から9の段の問題をスタートさせる関数
+        function start_q(i) {
+            var j;
+            n = i; //関数の引数の値をかけられる数とする
+            m = 1; //かける数は１で固定
+
+            //正解率、正解した数を初期化
+            ans_count = 0;
+            rate = 0;
+
+            ram_f = 0; //ランダム問題ではないので0で初期化。
+
+            //問題解答中に別の問題のボタンや制限時間の変更がされないようにする。
+            for (j = 0; j < 10; j++) {
+                document.kuku.elements[j].disabled = true;
+            }
+            for (j = 0; j < 3; j++) {
+                document.interval_time.elements[j].disabled = true;
+            }
+            //正解率と間違えた問題の数の表示を初期化
+            document.getElementById("answer_rate").innerHTML = "正解率 : ";
+            document.getElementById("mistake").innerHTML = "間違えた問題 : ";
+            //インターバルの開始
+            tmp = setInterval("make_q()", time);
+        }
+
+        //ランダム問題をスタートさせる関数。基本的にはstart_qと同じ。
+        function ram_start_q() {
+            var j;
+            ans_count = 0;
+            rate = 0;
+
+            ram_count = 0; //今が何問目なのかの値を初期化。また、nとmは乱数で決めるため、ここでnとmの初期化は行わない。
+
+            ram_f = 1; //ランダム問題なので、1で初期化。
+
+            for (j = 0; j < 10; j++) {
+                document.kuku.elements[j].disabled = true;
+            }
+            for (j = 0; j < 3; j++) {
+                document.interval_time.elements[j].disabled = true;
+            }
+            document.getElementById("answer_rate").innerHTML = "正解率 : ";
+            document.getElementById("mistake").innerHTML = "間違えた問題 : ";
+            //ランダム問題のインターバル開始
+            tmp = setInterval("ram_make_q()", time);
+        }
+
+        //1の段から9の段の問題を作成する関数
+        function make_q() {
+            //制限時間内にボタンが押されていない場合、不正解とみなすため間違えた問題の数を更新する。
+            if (flag == 0) {
+                var a;
+                a = m - 1;
+                document.getElementById("mistake").innerHTML = document.getElementById("mistake").innerHTML + n + " × " + a + " , ";
+            }
+
+            flag = 0; //フラグを0にしてボタンの入力を受け付ける。
+
+            var mis_ans = new Array(4); //誤答を記録する配列
+            var i, a;
+            ans = n * m; //正答を計算してansに保存
+
+            //誤答を作成してmis_ansに保存。誤答には負の数を含まないようにした。
+            if (ans - 1 <= 0) {
+                mis_ans[0] = ans + 4;
+            } else {
+                mis_ans[0] = ans - 1;
+            }
+            mis_ans[1] = ans + 1;
+            mis_ans[2] = ans + 2;
+            mis_ans[3] = ans + 3;
+
+            //正答を表示するボタンを乱数で決める
+            ran = Math.floor(Math.random() * 4);
+            document.answer.elements[ran].value = ans;
+
+            //正答としてボタン以外のボタンに誤答を割り振る
+            for (i = 0; i < 4; i++) {
+                if (i != ran) {
+                    document.answer.elements[i].value = mis_ans[i];
+                }
+            }
+
+            //問題の表示
+            document.getElementById("question").innerHTML = n + " × " + m;
+
+            m++; //かける数を更新
+
+            //終了処理
+            if (m > 10) {
+                var j;
+                clearInterval(tmp); //インターバルの停止
+
+                //問題選択ボタンと制限時間ボタンを有効にし、解答ボタンを初期化する。
+                for (j = 0; j < 10; j++) {
+                    document.kuku.elements[j].disabled = false;
+                }
+                for (j = 0; j < 4; j++) {
+                    document.answer.elements[j].value = "選択肢";
+                }
+                for (j = 0; j < 3; j++) {
+                    document.interval_time.elements[j].disabled = false;
+                }
+                rate = (ans_count / 9) * 100; //正解率を計算
+
+                //終了表示と、正解率の表示
+                document.getElementById("question").innerHTML = "終了";
+                document.getElementById("answer_rate").innerHTML = "正解率 : " + rate + " % ";
+
+                flag = 1; //終了後に解答ボタンが押されても応答しないようにフラグを1にしておく
+            }
+        }
+
+        //ランダム問題を作成する関数。基本的にはmake_qと同じ。
+        function ram_make_q() {
+            if (flag == 0) {
+
+                document.getElementById("mistake").innerHTML = document.getElementById("mistake").innerHTML + n + " × " + m + " , ";
+            }
+
+            flag = 0;
+
+            //かけられる数とかける数を1から9の乱数で決める
+            n = Math.floor(Math.random() * 9) + 1;
+            m = Math.floor(Math.random() * 9) + 1;
+
+            var mis_ans = new Array(4);
+            var i, a;
+            ans = n * m;
+            if (ans - 1 <= 0) {
+                mis_ans[0] = ans + 4;
+            } else {
+                mis_ans[0] = ans - 1;
+            }
+            mis_ans[1] = ans + 1;
+            mis_ans[2] = ans + 2;
+            mis_ans[3] = ans + 3;
+            ran = Math.floor(Math.random() * 4);
+            document.answer.elements[ran].value = ans;
+            for (i = 0; i < 4; i++) {
+                if (i != ran) {
+                    document.answer.elements[i].value = mis_ans[i];
+                }
+            }
+            document.getElementById("question").innerHTML = n + " × " + m;
+            ram_count++;
+            if (ram_count > 9) {
+                var j;
+                clearInterval(tmp);
+                for (j = 0; j < 10; j++) {
+                    document.kuku.elements[j].disabled = false;
+                }
+                for (j = 0; j < 4; j++) {
+                    document.answer.elements[j].value = "選択肢";
+                }
+                for (j = 0; j < 3; j++) {
+                    document.interval_time.elements[j].disabled = false;
+                }
+                rate = (ans_count / 9) * 100;
+                document.getElementById("question").innerHTML = "終了";
+                document.getElementById("answer_rate").innerHTML = "正解率 : " + rate + " % ";
+                flag = 1;
+            }
+        }
+
+        //選んだ解答が正解かどうか判定する関数
+        function select_ans(i) {
+            if (flag == 0) {
+                if (ans == parseInt(document.answer.elements[i].value)) {
+                    ans_count++; //正解なら正解した数を更新
+                } else {
+                    //間違えていた場合は間違えた問題の数の表示を更新する。
+                    var a;
+                    a = m - 1;
+                    //ランダム問題かどうかで場合分けをする。
+                    if (ram_f == 0) {
+                        document.getElementById("mistake").innerHTML = document.getElementById("mistake").innerHTML + n + " × " + a + " , ";
+                    }else{
+                        document.getElementById("mistake").innerHTML = document.getElementById("mistake").innerHTML + n + " × " + m + " , ";                       
+                    }
+                }
+            }
+            //制限時間内に複数回押されないようにフラグを1にしておく
+            flag = 1;
+        }
+    </script>
+</head>
+
+<body>
+    <font size="6">九九学習用ページ</font>
+    <!--ページの説明文-->
+    <p>九九の練習ができます。</p>
+    <p>練習したい段のボタンを押すと、画面右側に問題が出ます。</p>
+    <p>ランダムを押すと、1×9～9×9の間からランダムで選ばれた9題が出題されます。</p>
+    <p>制限時間内に正しい答えが書かれているボタンを押してください。</p>
+    <br>
+    <p>制限時間を設定してください。デフォルトでは1秒になっています。</p>
+    <!--制限時間を設定するボタンを配置。ミリ秒に変換してset_timeを呼び出す-->
+    <form name="interval_time">
+        <input type="button" value="1秒" onclick="set_time(1000)">
+        <input type="button" value="3秒" onclick="set_time(3000)">
+        <input type="button" value="5秒" onclick="set_time(5000)">
+    </form>
+    <!--現在設定されている制限時間の表示-->
+    <p id="limit" style="position:absolute;left:300px;top:295px">制限時間 : 1 秒 </p>
+    <br>
+    <!--問題選択ボタンを配置。対応する値を引数としてstart_qを呼び出す。ランダムの場合はram_start_qを呼び出す。-->
+    <form name="kuku">
+        <input type="button" value="1の段" onclick="start_q(1)"><br>
+        <input type="button" value="2の段" onclick="start_q(2)"><br>
+        <input type="button" value="3の段" onclick="start_q(3)"><br>
+        <input type="button" value="4の段" onclick="start_q(4)"><br>
+        <input type="button" value="5の段" onclick="start_q(5)"><br>
+        <input type="button" value="6の段" onclick="start_q(6)"><br>
+        <input type="button" value="7の段" onclick="start_q(7)"><br>
+        <input type="button" value="8の段" onclick="start_q(8)"><br>
+        <input type="button" value="9の段" onclick="start_q(9)"><br>
+        <input type="button" value="ランダム" onclick="ram_start_q()"><br>
+
+    </form>
+    <!--問題が表示される位置を明示しておくためのテキストを配置。-->
+    <font id="question" size="5" style="position:absolute;left:300px;top:380px">ここに問題が表示されます</font>
+    <br>
+    <!--解答ボタンの配置。対応する値を引数としてselet_ansを呼び出す-->
+    <form name="answer">
+        <input type="button" name="gs_1" value="選択肢" onclick="select_ans(0)"
+            style="width:80px; height: 50px; font-size:20px; position: absolute;left: 300;top: 480;">
+        <input type="button" name="gs_2" value="選択肢" onclick="select_ans(1)"
+            style="width:80px; height: 50px; font-size:20px; position: absolute;left: 400;top: 480;">
+        <input type="button" name="gs_3" value="選択肢" onclick="select_ans(2)"
+            style="width:80px; height: 50px; font-size:20px; position: absolute;left: 500;top: 480;">
+        <input type="button" name="gs_4" value="選択肢" onclick="select_ans(3)"
+            style="width:80px; height: 50px; font-size:20px; position: absolute;left: 600;top: 480;">
+    </form>
+    <!--正解率と間違えた問題の数を表示-->
+    <p id="answer_rate" style="position:absolute;left:300px;top:580px">正解率 : </p>
+    <p id="mistake" style="position:absolute;left:300px;top:610px">間違えた問題 : </p>
+</body>
+
+</html>
