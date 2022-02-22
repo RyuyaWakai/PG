@@ -10,6 +10,7 @@ public class Geister {
     // ***2 : 右***//
     // ***3 : 左***//
 
+    static String[] piece = { "0", "1", "2" }; // 盤面上の駒。[0]がエネミーの駒、[1]がプレイヤーの青駒、[2]がプレイヤーの赤駒
     static int victory_or_defeat = 0; // 勝敗フラグ。 0は試合続行、1はプレイヤーの勝ち、-1はエネミーの勝ち
     static int flag = 0; // エネミーの行動の実行フラグ。0ならば駒を移動でき、移動後は次のターンまで1にしておく
 
@@ -32,7 +33,8 @@ public class Geister {
         enemy.set(mass);
         enemy.set_keeper();
         make_mass(self, mass, enemy);
-        System.out.println("Which position do you want to set '1'? Enter the vertical and horizontal positions.");
+        System.out.println(
+                "Which position do you want to set '" + piece[1] + "'? Enter the vertical and horizontal positions.");
         for (int i = 0; i < 4; i++) {
             y = sc.nextInt();
             x = sc.nextInt();
@@ -40,7 +42,7 @@ public class Geister {
                 System.out.println("This position is out of range.");
                 i--;
                 continue;
-            } else if (mass.mass[y][x] == "1") {
+            } else if (mass.mass[y][x].equals(piece[1])) {
                 System.out.println("This position is already full.");
                 i--;
                 continue;
@@ -49,7 +51,7 @@ public class Geister {
             self.pos_d[1][i] = x;
             self.pre_pos_d[0][i] = y;
             self.pre_pos_d[1][i] = x;
-            mass.mass[y][x] = "1";
+            mass.mass[y][x] = piece[1];
             if (i == 3) {
                 break;
             }
@@ -59,8 +61,8 @@ public class Geister {
         tmp = 4;
         for (int i = 5; i < 7; i++) {
             for (int j = 2; j < 6; j++) {
-                if (mass.mass[i][j].equals("1") != true) {
-                    mass.mass[i][j] = "2";
+                if (mass.mass[i][j].equals(piece[1]) != true) {
+                    mass.mass[i][j] = piece[2];
                     self.pos_d[0][tmp] = i;
                     self.pos_d[1][tmp] = j;
                     self.pre_pos_d[0][tmp] = i;
@@ -96,11 +98,11 @@ public class Geister {
                     } else if (j == 7) {
                         if (i == 1 | i == 2) {
                             System.out.print("|");
-                            System.out.println("      Number of '" + i + "' you got : " + self.get[i]);
+                            System.out.println("      Number of '" + piece[i] + "' you got : " + self.get[i]);
                         } else if (i == 4 | i == 5) {
                             System.out.print("|");
                             System.out.println(
-                                    "      Number of '" + (i - 3) + "' taken by enemy : " + enemy.get[i - 3]);
+                                    "      Number of '" + piece[i - 3] + "' taken by enemy : " + enemy.get[i - 3]);
                         } else {
                             System.out.println("|");
                         }
@@ -109,7 +111,6 @@ public class Geister {
             }
         }
     }
-
 
     // ゲームのスタート、および対戦結果を行う関数
     static void game_start(make_ghost self, make_ghost enemy, mass_data mass) {
@@ -172,11 +173,11 @@ public class Geister {
         int tmp_y = 0;
         String dir;
 
-        System.out.println("Which numbers do you want to move? Please enter position.");
+        System.out.println("Which pieces do you want to move? Please enter position.");
         while (true) {
             y = sc.nextInt();
             x = sc.nextInt();
-            if (mass.mass[y][x].equals(" ") | mass.mass[y][x].equals("0") | y < 1 | y > 6 | x < 1 | x > 6
+            if (mass.mass[y][x].equals(" ") | mass.mass[y][x].equals(piece[0]) | y < 1 | y > 6 | x < 1 | x > 6
                     | min_contact_number(y, x, self, mass) == 4) {
                 System.out.println("This position has no numbers you can move.");
                 continue;
@@ -216,8 +217,8 @@ public class Geister {
             // もしkが4未満で、なおかつ(y,x) = (1,1) or (1,6)のときは、「動けません」を出さない
             if ((y != 1 & x != 1) | (y != 1 & x != 6)) {
                 if (k >= 4) {
-                    if (mass.mass[y + tmp_y][x + tmp_x].equals("1")
-                            | mass.mass[y + tmp_y][x + tmp_x].equals("2")) {
+                    if (mass.mass[y + tmp_y][x + tmp_x].equals(piece[1])
+                            | mass.mass[y + tmp_y][x + tmp_x].equals(piece[2])) {
                         System.out.println("This number can't move this direction.");
                         continue;
                     }
@@ -250,7 +251,6 @@ public class Geister {
 
     }
 
-
     // 残りの駒数をチェックする
     static void check_number_pieces(make_ghost self, make_ghost enemy) {
         if (self.blue_num == 0 | self.get[2] == 4 | enemy.get[1] == 4) {
@@ -273,7 +273,6 @@ public class Geister {
         }
         return 0; // 出口から出ていない
     }
-
 
     // エネミーのアルゴリズム
     static void enemy_algorithm(make_ghost self, make_ghost enemy, mass_data mass) {
@@ -525,11 +524,11 @@ public class Geister {
                 }
             }
             if (mass.mass[enemy.pos_d[0][index] + dir_y][enemy.pos_d[1][index]
-                    + dir_x].equals("1")) {
+                    + dir_x].equals(piece[1])) {
                 self.blue_num--;
                 enemy.get[1]++;
             } else if (mass.mass[enemy.pos_d[0][index] + dir_y][enemy.pos_d[1][index]
-                    + dir_x].equals("2")) {
+                    + dir_x].equals(piece[2])) {
                 self.red_num--;
                 enemy.get[2]++;
             }
@@ -541,23 +540,22 @@ public class Geister {
         }
     }
 
-
     // (y,x)の周りにプレイヤーが何体いるかを返す関数
     static int min_contact_number(int y, int x, make_ghost enemy, mass_data mass) {
         int count = 0;
         for (int i = 0; i < 4; i++) {
             if (i < 2) {
                 if (mass.mass[y + (int) Math.pow(-1, i)][x]
-                        .equals("1")
+                        .equals(piece[1])
                         | mass.mass[y + (int) Math.pow(-1, i)][x]
-                                .equals("2")) {
+                                .equals(piece[2])) {
                     count++;
                 }
             } else {
                 if (mass.mass[y][x + (int) Math.pow(-1, i)]
-                        .equals("1")
+                        .equals(piece[1])
                         | mass.mass[y][x + (int) Math.pow(-1, i)]
-                                .equals("2")) {
+                                .equals(piece[2])) {
                     count++;
                 }
             }
@@ -582,7 +580,7 @@ public class Geister {
     static double return_value_blue(int y, int x, mass_data mass, make_ghost self, make_ghost enemy) {
         int i;
         if (y != -1 & x != -1) {
-            if (mass.mass[y][x].equals("1") | mass.mass[y][x].equals("2")) {
+            if (mass.mass[y][x].equals(piece[1]) | mass.mass[y][x].equals(piece[2])) {
                 for (i = 0; i < 8; i++) {
                     if (self.pos_d[0][i] == y & self.pos_d[1][i] == x) {
                         break;
@@ -596,7 +594,6 @@ public class Geister {
         return -100.0;
     }
 
-    
     // 盤面作成
     static class mass_data {
         String[][] mass = new String[8][8];
@@ -605,7 +602,7 @@ public class Geister {
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
                     if (i == 0 | i == 7 | j == 0 | j == 7) {
-                        mass[i][j] = "1";
+                        mass[i][j] = piece[1];
                     } else {
                         mass[i][j] = " ";
                     }
@@ -670,7 +667,7 @@ public class Geister {
             int rand = random.nextInt(100);
             for (int n = 1; n < 3; n++) {
                 for (int m = 2; m < 6; m++) {
-                    mass.mass[n][m] = "0";
+                    mass.mass[n][m] = piece[0];
 
                     if (rand < 25) {
                         if ((n == 1) & (m != 5) | (m == 5) & (n == 2)) {
