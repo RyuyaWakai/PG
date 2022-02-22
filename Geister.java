@@ -640,16 +640,16 @@ public class Geister {
                     for (int j = 0; j < 4; j++) {
                         if (j < 2) {
                             if (mass.mass[pos_d[0][i] + (int) Math.pow(-1, j)][pos_d[1][i]]
-                                    .equals("" + tmp)
+                                    .equals(piece[tmp])
                                     | mass.mass[pos_d[0][i] + (int) Math.pow(-1, j)][pos_d[1][i]]
-                                            .equals("" + (tmp * 2))) {
+                                            .equals(piece[tmp * 2])) {
                                 con_num[i]++;
                             }
                         } else {
                             if (mass.mass[pos_d[0][i] + (int) Math.pow(-1, j)][pos_d[1][i]]
-                                    .equals("" + tmp)
+                                    .equals(piece[tmp])
                                     | mass.mass[pos_d[0][i] + (int) Math.pow(-1, j)][pos_d[1][i]]
-                                            .equals("" + (tmp * 2))) {
+                                            .equals(piece[tmp * 2])) {
                                 con_num[i]++;
                             }
                         }
